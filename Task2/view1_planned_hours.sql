@@ -46,3 +46,6 @@ GROUP BY
     cl.hp,
     ci.study_period,
     ci.num_students;
+
+-- 1. Planned hours per course instance (8×/day)
+SELECT course_code, course_instance_id, hp, 'P'||study_period AS period, num_students, lecture_hours, tutorial_hours, lab_hours, seminar_hours, other_hours, admin_hours, exam_hours, total_hours FROM olap WHERE teacher_name IS NULL AND study_year = EXTRACT(YEAR FROM CURRENT_DATE) ORDER BY study_period, course_code;
