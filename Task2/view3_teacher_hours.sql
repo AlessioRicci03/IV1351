@@ -52,3 +52,6 @@ GROUP BY
     p.first_name,
     p.last_name;
 
+
+-- 3. Teacher load per period (5×/day)
+SELECT employment_id, teacher_name, designation, study_year, study_period, COUNT(DISTINCT course_instance_id) AS courses, SUM(total_hours) AS total_hours FROM olap WHERE teacher_name IS NOT NULL AND study_year = EXTRACT(YEAR FROM CURRENT_DATE) GROUP BY employment_id, teacher_name, designation, study_year, study_period ORDER BY total_hours DESC;
