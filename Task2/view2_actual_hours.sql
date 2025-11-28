@@ -38,3 +38,6 @@ GROUP BY
     cl.course_name,
     ci.study_year,
     ci.study_period;
+
+-- 2. Actual allocated hours per teacher per course instance (12×/day)
+SELECT course_code, course_instance_id, hp, teacher_name, designation, lecture_hours, tutorial_hours, lab_hours, seminar_hours, other_hours, admin_hours, exam_hours, total_hours FROM olap WHERE teacher_name IS NOT NULL AND study_year = EXTRACT(YEAR FROM CURRENT_DATE) ORDER BY total_hours DESC, teacher_name;
