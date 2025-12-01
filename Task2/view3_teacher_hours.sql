@@ -1,9 +1,10 @@
-CREATE OR REPLACE VIEW v_teacher_hours_current_year AS
+CREATE OR REPLACE VIEW v_teacher_hours_per_year AS
 SELECT
     ci.course_instance_id,
     cl.course_code,
     cl.hp,
     ci.study_period AS period,
+    ci.study_year,
 
     e.employment_id,
     p.first_name,
@@ -41,17 +42,12 @@ JOIN course_layout cl       ON ci.course_layout_id = cl.course_layout_id
 JOIN employee e             ON a.employment_id = e.employment_id
 JOIN person p               ON e.person_id = p.person_id
 
-WHERE ci.study_year = EXTRACT(YEAR FROM CURRENT_DATE)
-
 GROUP BY
     ci.course_instance_id,
     cl.course_code,
     cl.hp,
     ci.study_period,
+    ci.study_year,
     e.employment_id,
     p.first_name,
     p.last_name;
-
-
--- 3. Teacher load per period (5×/day)
-SELECT employment_id, teacher_name, designation, study_year, study_period, COUNT(DISTINCT course_instance_id) AS courses, SUM(total_hours) AS total_hours FROM olap WHERE teacher_name IS NOT NULL AND study_year = EXTRACT(YEAR FROM CURRENT_DATE) GROUP BY employment_id, teacher_name, designation, study_year, study_period ORDER BY total_hours DESC;
