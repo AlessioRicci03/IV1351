@@ -1,0 +1,29 @@
+-- VIEW 1: Get all planned hours for some specified year, used in the report
+SELECT *
+FROM v_planned_hours
+WHERE study_year = 2025;
+
+-- VIEW 2: Get the actual hours, used in the report
+SELECT * FROM v_teacher_hours;
+
+-- VIEW 3: Get the hours for all teachers within the year
+SELECT *
+FROM v_teacher_hours_per_year
+WHERE study_year = 2025;
+
+-- VIEW 3: Alternatively, get the hours for a specific teacher and year, used in the report
+SELECT *
+FROM v_teacher_hours_per_year
+WHERE employment_id = 1
+  AND study_year = 2024;
+
+-- VIEW 4: Allocation amount for a specific teacher and period, used in the report
+SELECT *
+FROM mv_teacher_allocation_counts
+WHERE employment_id = 1
+  AND study_period = 1;
+
+-- VIEW 4: All teachers within period two
+SELECT *
+FROM mv_teacher_allocation_counts
+WHERE study_period = 2;
