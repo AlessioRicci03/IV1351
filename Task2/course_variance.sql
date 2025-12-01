@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW mv_course_instance_variance AS
+CREATE VIEW mv_course_instance_variance AS
 SELECT
     ci.course_code,
     ci.course_instance_id,
@@ -44,3 +44,4 @@ GROUP BY
 
 -- 4. Course instances with planned vs actual variance >15% (3×/day)
 WITH course_totals AS (SELECT course_instance_id, MAX(CASE WHEN employment_id IS NULL THEN total_hours END) AS planned, SUM(CASE WHEN employment_id IS NOT NULL THEN total_hours END) AS allocated FROM olap WHERE study_year = EXTRACT(YEAR FROM CURRENT_DATE) GROUP BY course_instance_id) SELECT course_instance_id, course_code, study_year||'-P'||study_period AS period, planned, allocated, ROUND(100.0*ABS(planned-allocated)/NULLIF(planned,0),2) AS variance_pct FROM course_totals JOIN olap USING(course_instance_id) WHERE employment_id IS NULL AND ABS(planned-allocated)/NULLIF(planned,0) > 0.15 ORDER BY variance_pct DESC;
+
