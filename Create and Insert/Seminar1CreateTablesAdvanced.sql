@@ -2,7 +2,7 @@
 --   DEPARTMENT
 -- =============================================================
 CREATE TABLE department (
-    department_id    INT PRIMARY KEY,
+    department_id    SERIAL PRIMARY KEY,
     department_name  CHAR(10) UNIQUE NOT NULL
 );
 
@@ -10,7 +10,7 @@ CREATE TABLE department (
 --   PERSON
 -- =============================================================
 CREATE TABLE person (
-    person_id        INT PRIMARY KEY,
+    person_id        SERIAL PRIMARY KEY,
     personal_number  VARCHAR(12) UNIQUE NOT NULL,
     first_name       CHAR(30),
     last_name        CHAR(30),
@@ -22,7 +22,7 @@ CREATE TABLE person (
 --   JOB TITLE
 -- =============================================================
 CREATE TABLE job_title (
-    job_title_id   INT PRIMARY KEY,
+    job_title_id   SERIAL PRIMARY KEY,
     job_title      CHAR(20) UNIQUE NOT NULL
 );
 
@@ -30,7 +30,7 @@ CREATE TABLE job_title (
 --   EMPLOYEE
 -- =============================================================
 CREATE TABLE employee (
-    employment_id     INT PRIMARY KEY,
+    employment_id     SERIAL PRIMARY KEY,,
     skill_set         CHAR(100),
     supervisor_manager BOOLEAN,
     job_title_id      INT NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE employee (
 -- =============================================================
 -- We keep one row per employee, but salary gets its own history table
 CREATE TABLE employee_salary_history (
-    salary_history_id  INT PRIMARY KEY,
+    salary_history_id  SERIAL PRIMARY KEY,,
     employment_id      INT NOT NULL,
     
     salary             INT NOT NULL,
@@ -74,7 +74,7 @@ DROP TABLE IF EXISTS course_instance;      -- must drop in correct order
 DROP TABLE IF EXISTS course_layout;
 
 CREATE TABLE course_layout (
-    course_layout_id    INT PRIMARY KEY,  
+    course_layout_id    SERIAL PRIMARY KEY,,  
     course_code         VARCHAR(6) NOT NULL,           
     version_number      INT NOT NULL DEFAULT 1,        -- 1, 2, 3,...
     course_name         CHAR(50) NOT NULL,
@@ -108,7 +108,7 @@ CREATE INDEX idx_course_layout_valid ON course_layout(course_code, valid_from, v
 --   COURSE INSTANCE
 -- =============================================================
 CREATE TABLE course_instance (
-    course_instance_id   INT PRIMARY KEY,
+    course_instance_id   SERIAL PRIMARY KEY,,
     num_students         INT,
     study_year           INT NOT NULL,
     study_period         INT NOT NULL,
@@ -123,7 +123,7 @@ CREATE TABLE course_instance (
 --   TEACHING ACTIVITY
 -- =============================================================
 CREATE TABLE teaching_activity (
-    activity_id     INT PRIMARY KEY,
+    activity_id     SERIAL PRIMARY KEY,,
     activity_name   CHAR(10) UNIQUE NOT NULL,
     factor          DECIMAL(10,2)
 );
@@ -132,7 +132,7 @@ CREATE TABLE teaching_activity (
 --   PLANNED ACTIVITY
 -- =============================================================
 CREATE TABLE planned_activity (
-    planned_activity_id  INT PRIMARY KEY,
+    planned_activity_id  SERIAL PRIMARY KEY,,
     planned_hours        INT,
     activity_id          INT NOT NULL,
     course_instance_id   INT NOT NULL,
@@ -307,3 +307,4 @@ BEGIN
     );
 END;
 $$ LANGUAGE plpgsql;
+
