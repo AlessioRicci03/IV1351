@@ -27,17 +27,17 @@ INSERT INTO person (personal_number, first_name, last_name, phone_number, addres
 ('197212258899', 'Tomas', 'Jönsson', '0710123450', 'Biologiska 7');
 
 -- 4. Employees (references person_id and department_id generated above)
-INSERT INTO employee (skill_set, supervisor_manager, job_title_id, person_id, department_id, max_allocations) VALUES
-('Calculus, Linear Algebra', TRUE,  1, 1, 1, 4),  -- Anna → Math manager
-('Quantum Mechanics',       FALSE, 1, 2, 2, 4),
-('Organic Chemistry',       TRUE,  1, 3, 3, 4),  -- Maria → Chemistry manager
-('Algorithms, Databases',   FALSE, 2, 4, 5, 5),
-('Ecology, Genetics',       TRUE,  1, 5, 4, 4),  -- Lisa → Biology manager
-('Ancient History',         FALSE, 4, 6, 6, 4),
-('Modern Literature',       TRUE,  2, 7, 7, 4),  -- Karin → Literature manager
-('Thermodynamics',          FALSE, 1, 8, 2, 4),
-('Civil Law',               TRUE,  1, 9, 9, 4),  -- Sofia → Law manager
-('Medicine, Surgery',       TRUE,  1, 10, 10, 4); -- Tomas → Medicine manager
+INSERT INTO employee (skill_set, supervisor_manager, job_title_id, person_id, department_id) VALUES
+('Calculus, Linear Algebra', TRUE,  1, 1, 1),  -- Anna → Math manager
+('Quantum Mechanics',       FALSE, 1, 2, 2),
+('Organic Chemistry',       TRUE,  1, 3, 3),  -- Maria → Chemistry manager
+('Algorithms, Databases',   FALSE, 2, 4, 5),
+('Ecology, Genetics',       TRUE,  1, 5, 4),  -- Lisa → Biology manager
+('Ancient History',         FALSE, 4, 6, 6),
+('Modern Literature',       TRUE,  2, 7, 7),  -- Karin → Literature manager
+('Thermodynamics',          FALSE, 1, 8, 2),
+('Civil Law',               TRUE,  1, 9, 9),  -- Sofia → Law manager
+('Medicine, Surgery',       TRUE,  1, 10, 10); -- Tomas → Medicine manager
 
 -- 5. Teaching activities
 INSERT INTO teaching_activity (activity_name, factor) VALUES
@@ -107,7 +107,11 @@ INSERT INTO allocation (planned_activity_id, employment_id) VALUES
 (10,7), -- Karin: LIT101 seminar
 (2, 2); -- Erik: Exercise MAT101 2024
 
--- 10. Salary history
+-- 10. Allocation rule
+INSERT INTO allocation_rule (rule_name, max_allocations) VALUES
+('allocation_limit', 4);
+
+-- 11. Salary history
 INSERT INTO employee_salary_history (employment_id, salary, valid_from, is_current) VALUES
 (1, 65000, '2023-01-01', FALSE),
 (1, 72000, '2025-01-01', TRUE),
@@ -120,3 +124,4 @@ INSERT INTO employee_salary_history (employment_id, salary, valid_from, is_curre
 (7,61000, '2023-01-01', TRUE),
 (9,69000, '2023-01-01', TRUE),
 (10,85000,'2023-01-01', TRUE);
+
