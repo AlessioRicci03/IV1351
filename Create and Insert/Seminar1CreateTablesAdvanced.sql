@@ -36,7 +36,6 @@ CREATE TABLE employee (
     job_title_id      INT NOT NULL,
     person_id         INT NOT NULL,
     department_id     INT NOT NULL,
-    max_allocations   INT DEFAULT 4 NOT NULL,
 
     FOREIGN KEY (job_title_id) REFERENCES job_title(job_title_id),
     FOREIGN KEY (person_id) REFERENCES person(person_id),
@@ -155,6 +154,14 @@ CREATE TABLE allocation (
 );
 
 -- =============================================================
+-- ALLOCATION LIMIT
+-- =============================================================
+CREATE TABLE allocation_rule (
+    rule_name CHAR(20) PRIMARY KEY,
+    max_allocations INT NOT NULL CHECK (max_allocations > 0)
+);
+
+-- =============================================================
 --   TRIGGER FUNCTION: CHECK MAX ALLOCATIONS PER PERIOD
 -- =============================================================
 CREATE OR REPLACE FUNCTION check_max_allocations()
@@ -164,13 +171,13 @@ DECLARE
     period      INT;
     current_count INT;
 BEGIN
-    -- 1. Check employee exists and get max_allocations
+    -- 1. Check max_allocations from the rule table
     SELECT max_allocations INTO allowed
-    FROM employee
-    WHERE employment_id = NEW.employment_id;
+    FROM allocation_rule
+    WHERE rule_name = 'allocation_limit';
 
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Employee with employment_id % does not exist.', NEW.employment_id;
+        RAISE EXCEPTION 'Allocation limit not configured in the rule table';
     END IF;
 
     -- 2. Get study period of the planned activity being allocated
@@ -307,5 +314,6 @@ BEGIN
     );
 END;
 $$ LANGUAGE plpgsql;
+
 
 
