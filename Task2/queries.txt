@@ -4,7 +4,8 @@ FROM v_planned_hours
 WHERE study_year = 2025;
 
 -- VIEW 2: Get the actual hours, used in the report
-SELECT * FROM v_teacher_hours;
+SELECT * FROM v_teacher_hours
+WHERE course_instance_id = 1;
 
 -- VIEW 3: Get the hours for all teachers within the year
 SELECT *
@@ -27,3 +28,4 @@ WHERE employment_id = 1
 SELECT *
 FROM mv_teacher_allocation_counts
 WHERE study_period = 2;
+
