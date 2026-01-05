@@ -28,6 +28,8 @@ AND study_period = 1;
 -- VIEW 4: All teachers within period two
 SELECT *
 FROM mv_teacher_allocation_counts
-WHERE study_period = 2;
+WHERE study_period = 2
+AND study_year = 2025;
+
 
 
