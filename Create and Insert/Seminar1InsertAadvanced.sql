@@ -69,17 +69,17 @@ INSERT INTO course_layout (
 ('LAW101', 1, 'Introduction to Law',15.0,  20, 200, '2023-01-01', TRUE,  9);
 
 -- 7. Course instances
-INSERT INTO course_instance (num_students, study_year, study_period, course_layout_id) VALUES
-(98,  2024, 1, 1), -- MAT101 2024 P1
-(75,  2024, 2, 2), -- MAT201 2024 P2
-(62,  2025, 1, 1), -- MAT101 2025 P1 (same version)
-(45,  2025, 1, 3), -- FYS101
-(132, 2025, 1, 5), -- KEM101 new version
-(88,  2025, 1, 6), -- BIO101
-(280, 2025, 1, 7), -- DAT101
-(42,  2025, 2, 8), -- HIS101
-(38,  2025, 2, 9), -- LIT101
-(165, 2025, 2, 10);-- LAW101
+INSERT INTO course_instance (course_instance_id, num_students, study_year, study_period, course_layout_id) VALUES
+(1, 98,  2024, 1, 1), -- MAT101 2024 P1
+(2, 75,  2024, 2, 2), -- MAT201 2024 P2
+(3, 62,  2025, 1, 1), -- MAT101 2025 P1 (same version)
+(4, 45,  2025, 1, 3), -- FYS101
+(5, 132, 2025, 1, 5), -- KEM101 new version
+(6, 88,  2025, 1, 6), -- BIO101
+(7, 280, 2025, 1, 7), -- DAT101
+(8, 42,  2025, 2, 8), -- HIS101
+(9, 38,  2025, 2, 9), -- LIT101
+(10, 165, 2025, 2, 10);-- LAW101
 
 -- 8. Planned activities
 INSERT INTO planned_activity (planned_hours, activity_id, course_instance_id) VALUES
@@ -124,4 +124,5 @@ INSERT INTO employee_salary_history (employment_id, salary, valid_from, is_curre
 (7,61000, '2023-01-01', TRUE),
 (9,69000, '2023-01-01', TRUE),
 (10,85000,'2023-01-01', TRUE);
+
 
