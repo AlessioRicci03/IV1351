@@ -11,3 +11,4 @@ public class TeacherDTO {
 
     public record ExerciseResult(boolean success, String message) {}
 }
+
