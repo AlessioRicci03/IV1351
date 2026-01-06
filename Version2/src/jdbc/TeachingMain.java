@@ -1,7 +1,7 @@
 package jdbc;
 
 import jdbc.Controller.TeachingController;
-import jdbc.Integration.TeachingDAO;
+import jdbc.Model.TeachingModel;
 import jdbc.view.ConsoleView;
 
 import java.sql.*;
@@ -10,9 +10,9 @@ public class TeachingMain {
     public static void main(String[] args) {
         try {
             Connection conn = DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/course_advanced", "postgres", "2003");
-            TeachingDAO dao = new TeachingDAO(conn);
-            TeachingController controller = new TeachingController(dao);
+                "jdbc:postgresql://localhost:5432/IV1351_proj", "postgres", "edmatrix");
+            TeachingModel model = new TeachingModel(conn);
+            TeachingController controller = new TeachingController(model);
             ConsoleView view = new ConsoleView(controller);
             
             view.run();
