@@ -1,31 +1,42 @@
 package jdbc.Controller;
 
+
 import java.sql.SQLException;
 
-import jdbc.Integration.TeachingDAO;
+import jdbc.DTO.TeacherDTO.AllocationResult;
+import jdbc.DTO.TeacherDTO.Case1Result;
+import jdbc.DTO.TeacherDTO.Case2Result;
+import jdbc.DTO.TeacherDTO.DeallocationResult;
+import jdbc.DTO.TeacherDTO.ExerciseResult;
+import jdbc.Model.TeachingModel;
 
-import java.sql.*;
 
 public class TeachingController {
 
-    public Case1Result computeTeachingCost(String courseCode, int period) {
-        return model.computeTeachingCost(courseCode, period);
+    private final TeachingModel model;
+
+    public TeachingController(TeachingModel model){
+        this.model = model;
+    }
+
+    public Case1Result computeTeachingCost(String courseCode, int year, int period) {
+        return model.computeTeachingCost(courseCode, year, period);
     }
 
 
 
-    public void modifyStudents(String courseCode, int period, int deltaStudents) {
+    public Case2Result modifyStudents(String courseCode, int year, int period, int deltaStudents) {
         try {
-            Case2Result result = model.modifyStudentsAndComputeCost(courseCode, period, deltaStudents);
-            view.showCase2Result(result);
-        } catch (Exception e) {
-            view.showError(e);
+            Case2Result result = model.modifyStudentsAndComputeCost(courseCode, year, period, deltaStudents);
+            return result;
+        } catch(SQLException e){
+            return new Case2Result(-1, -1, -1.0, -1.0);
         }
     }
 
 
-    public void allocateTeacher(int activity, string teacherID){
-        return model.allocateTeacher(activity, teacherID);
+    public AllocationResult allocateTeacher(int year, int activity, int teacherID){
+        return model.allocateTeacher(year, activity, teacherID);
     }
 
     public DeallocationResult deallocateTeacher(int activityId, int empId) {
@@ -36,10 +47,12 @@ public class TeachingController {
     public ExerciseResult addExercise(
         String courseCode,
         int period,
+        int year,
+        String activityName,
         double hours,
         int teacherId
     ) {
-        return model.addExerciseActivity(courseCode, period, hours, teacherId);
+        return model.addExerciseActivity(courseCode, period, year, activityName, hours, teacherId);
     }
 
 }
