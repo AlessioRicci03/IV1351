@@ -21,3 +21,15 @@ JOIN course_instance ci     ON pa.course_instance_id = ci.course_instance_id
 JOIN course_layout cl       ON ci.course_layout_id = cl.course_layout_id
 GROUP BY
     cl.course_code, ci.course_instance_id, cl.hp, ci.study_period, ci.num_students, ci.study_year;
+
+CREATE INDEX IF NOT EXISTS idx_planned_activity_join_cols
+ON planned_activity (course_instance_id, activity_id)
+INCLUDE (planned_hours);
+
+CREATE INDEX IF NOT EXISTS idx_teaching_activity_name_factor
+ON teaching_activity (activity_name)
+INCLUDE (factor);
+
+CREATE INDEX IF NOT EXISTS idx_course_layout_join
+ON course_layout (course_layout_id)
+INCLUDE (course_code, hp);
