@@ -38,3 +38,20 @@ GROUP BY
     cl.course_name,
     ci.study_year,
     ci.study_period;
+
+CREATE INDEX idx_course_instance_year_period 
+ON course_instance (study_year DESC, study_period, course_instance_id)
+INCLUDE (course_layout_id);
+
+CREATE INDEX idx_planned_activity_join 
+ON planned_activity (planned_activity_id, activity_id, course_instance_id)
+INCLUDE (planned_hours);
+
+CREATE INDEX idx_allocation_planned_activity_id 
+ON allocation (planned_activity_id);
+
+CREATE INDEX idx_allocation_employment_id 
+ON allocation (employment_id);
+
+CREATE INDEX idx_course_layout_id_covering 
+ON course_layout (course_layout_id) INCLUDE (course_code, course_name);
