@@ -1,19 +1,23 @@
 -- =============================================================
--- INSERT TEST DATA – 10 rows per table (realistic & consistent)
+--                     INSERT TEST DATA
 -- =============================================================
 
--- 1. Departments
+-- 1. Allocation rule
+INSERT INTO allocation_rule (rule_name, max_allocations) VALUES
+('allocation_limit', 4);
+
+-- 2. Departments
 INSERT INTO department (department_name) VALUES
 ('Math'), ('Physics'), ('Chemistry'), ('Biology'), ('CS'),
 ('History'), ('Literature'), ('Economics'), ('Law'), ('Medicine');
 
--- 2. Job titles
+-- 3. Job titles
 INSERT INTO job_title (job_title) VALUES
 ('Professor'), ('Associate Prof'), ('Assistant Prof'), ('Lecturer'),
 ('Senior Lecturer'), ('Postdoc'), ('PhD Student'), ('Adjunct'),
 ('Researcher'), ('Lab Engineer');
 
--- 3. Persons
+-- 4. Persons
 INSERT INTO person (personal_number, first_name, last_name, phone_number, address) VALUES
 ('197505123456', 'Anna', 'Andersson', '0701234561', 'Storgatan 1, Lund'),
 ('198102287890', 'Erik', 'Bergström', '0702345672', 'Kungsgatan 5, Malmö'),
@@ -26,7 +30,7 @@ INSERT INTO person (personal_number, first_name, last_name, phone_number, addres
 ('198707117788', 'Sofia', 'Ivarsson', '0709012349', 'Kemi vägen 15'),
 ('197212258899', 'Tomas', 'Jönsson', '0710123450', 'Biologiska 7');
 
--- 4. Employees (references person_id and department_id generated above)
+-- 5. Employees (references person_id and department_id generated above)
 INSERT INTO employee (skill_set, supervisor_manager, job_title_id, person_id, department_id) VALUES
 ('Calculus, Linear Algebra', TRUE,  1, 1, 1),  -- Anna → Math manager
 ('Quantum Mechanics',       FALSE, 1, 2, 2),
@@ -39,7 +43,7 @@ INSERT INTO employee (skill_set, supervisor_manager, job_title_id, person_id, de
 ('Civil Law',               TRUE,  1, 9, 9),  -- Sofia → Law manager
 ('Medicine, Surgery',       TRUE,  1, 10, 10); -- Tomas → Medicine manager
 
--- 5. Teaching activities
+-- 6. Teaching activities
 INSERT INTO teaching_activity (activity_name, factor) VALUES
 ('Lecture',    1.0),
 ('Exercise',   0.8),
@@ -52,7 +56,7 @@ INSERT INTO teaching_activity (activity_name, factor) VALUES
 ('Workshop',   1.1),
 ('GuestLect',  1.0);
 
--- 6. Course layouts
+-- 7. Course layouts
 INSERT INTO course_layout (
     course_code, version_number, course_name, hp, min_students, max_students,
     valid_from, is_current, department_id
@@ -68,7 +72,7 @@ INSERT INTO course_layout (
 ('LIT101', 1, 'Swedish Literature', 7.5,  12,  50, '2023-01-01', TRUE,  7),
 ('LAW101', 1, 'Introduction to Law',15.0,  20, 200, '2023-01-01', TRUE,  9);
 
--- 7. Course instances
+-- 8. Course instances
 INSERT INTO course_instance (course_instance_id, num_students, study_year, study_period, course_layout_id) VALUES
 (1, 98,  2024, 1, 1), -- MAT101 2024 P1
 (2, 75,  2024, 2, 2), -- MAT201 2024 P2
@@ -81,7 +85,7 @@ INSERT INTO course_instance (course_instance_id, num_students, study_year, study
 (9, 38,  2025, 2, 9), -- LIT101
 (10, 165, 2025, 2, 10);-- LAW101
 
--- 8. Planned activities
+-- 9. Planned activities
 INSERT INTO planned_activity (planned_hours, activity_id, course_instance_id) VALUES
 (40, 1, 1), -- Lecture MAT101 2024
 (20, 2, 1), -- Exercise MAT101 2024
@@ -94,7 +98,7 @@ INSERT INTO planned_activity (planned_hours, activity_id, course_instance_id) VA
 (8,  6, 10),-- Exam LAW101
 (15, 4, 9); -- Seminar LIT101
 
--- 9. Allocations (respects max 4 per period)
+-- 10. Allocations (respects max 4 per period)
 INSERT INTO allocation (planned_activity_id, employment_id) VALUES
 (1, 1), -- Anna: old MAT101 2024
 (4, 1), -- Anna: MAT101 2025
@@ -106,10 +110,6 @@ INSERT INTO allocation (planned_activity_id, employment_id) VALUES
 (9, 9), -- Sofia: LAW101 exam
 (10,7), -- Karin: LIT101 seminar
 (2, 2); -- Erik: Exercise MAT101 2024
-
--- 10. Allocation rule
-INSERT INTO allocation_rule (rule_name, max_allocations) VALUES
-('allocation_limit', 4);
 
 -- 11. Salary history
 INSERT INTO employee_salary_history (employment_id, salary, valid_from, is_current) VALUES
@@ -124,5 +124,3 @@ INSERT INTO employee_salary_history (employment_id, salary, valid_from, is_curre
 (7,61000, '2023-01-01', TRUE),
 (9,69000, '2023-01-01', TRUE),
 (10,85000,'2023-01-01', TRUE);
-
-
