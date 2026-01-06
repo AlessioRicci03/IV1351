@@ -1,7 +1,27 @@
+DROP TABLE IF EXISTS allocation CASCADE;
+DROP TABLE IF EXISTS planned_activity CASCADE;
+DROP TABLE IF EXISTS course_instance CASCADE;
+DROP TABLE IF EXISTS employee_salary_history CASCADE;
+DROP TABLE IF EXISTS employee CASCADE;
+DROP TABLE IF EXISTS course_layout CASCADE;
+DROP TABLE IF EXISTS teaching_activity CASCADE;
+DROP TABLE IF EXISTS person CASCADE;
+DROP TABLE IF EXISTS department CASCADE;
+DROP TABLE IF EXISTS allocation_rule CASCADE;
+DROP TABLE IF EXISTS job_title CASCADE;
+
+-- =============================================================
+-- ALLOCATION LIMIT
+-- =============================================================
+CREATE TABLE IF NOT EXISTS allocation_rule (
+    rule_name CHAR(20) PRIMARY KEY,
+    max_allocations INT NOT NULL CHECK (max_allocations > 0)
+);
+
 -- =============================================================
 --   DEPARTMENT
 -- =============================================================
-CREATE TABLE department (
+CREATE TABLE IF NOT EXISTS department (
     department_id    SERIAL PRIMARY KEY,
     department_name  CHAR(10) UNIQUE NOT NULL
 );
@@ -9,7 +29,7 @@ CREATE TABLE department (
 -- =============================================================
 --   PERSON
 -- =============================================================
-CREATE TABLE person (
+CREATE TABLE IF NOT EXISTS person (
     person_id        SERIAL PRIMARY KEY,
     personal_number  VARCHAR(12) UNIQUE NOT NULL,
     first_name       CHAR(30),
@@ -21,7 +41,7 @@ CREATE TABLE person (
 -- =============================================================
 --   JOB TITLE
 -- =============================================================
-CREATE TABLE job_title (
+CREATE TABLE IF NOT EXISTS job_title (
     job_title_id   SERIAL PRIMARY KEY,
     job_title      CHAR(20) UNIQUE NOT NULL
 );
@@ -29,7 +49,7 @@ CREATE TABLE job_title (
 -- =============================================================
 --   EMPLOYEE
 -- =============================================================
-CREATE TABLE employee (
+CREATE TABLE IF NOT EXISTS employee (
     employment_id     SERIAL PRIMARY KEY,
     skill_set         CHAR(100),
     supervisor_manager BOOLEAN,
@@ -46,7 +66,7 @@ CREATE TABLE employee (
 -- 2. EMPLOYEE – now with salary history (only salary is versioned)
 -- =============================================================
 -- We keep one row per employee, but salary gets its own history table
-CREATE TABLE employee_salary_history (
+CREATE TABLE IF NOT EXISTS employee_salary_history (
     salary_history_id  SERIAL PRIMARY KEY,
     employment_id      INT NOT NULL,
     
@@ -63,16 +83,14 @@ CREATE TABLE employee_salary_history (
 );
 
 -- Index to get current salary instantly
-CREATE UNIQUE INDEX idx_current_salary ON employee_salary_history(employment_id) WHERE is_current = TRUE;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_current_salary ON employee_salary_history(employment_id) WHERE is_current = TRUE;
 -- Example Query: SELECT salary FROM employee_salary_history WHERE employment_id = 1 AND is_current = TRUE;
 
 -- =============================================================
 -- NEW: COURSE_LAYOUT with versioning (replaces the old one)
 -- =============================================================
-DROP TABLE IF EXISTS course_instance;      -- must drop in correct order
-DROP TABLE IF EXISTS course_layout;
 
-CREATE TABLE course_layout (
+CREATE TABLE IF NOT EXISTS course_layout (
     course_layout_id    SERIAL PRIMARY KEY,  
     course_code         VARCHAR(6) NOT NULL,           
     version_number      INT NOT NULL DEFAULT 1,        -- 1, 2, 3,...
@@ -96,17 +114,17 @@ CREATE TABLE course_layout (
     CHECK (valid_to IS NULL OR valid_to > valid_from)
 );
 -- Allows us to get the current version of course X
-CREATE INDEX idx_course_layout_current ON course_layout(course_code) WHERE is_current = TRUE;
+CREATE INDEX IF NOT EXISTS idx_course_layout_current ON course_layout(course_code) WHERE is_current = TRUE;
 -- Example Query: SELECT * FROM course_layout WHERE course_code = 'MAT101' AND is_current = TRUE;
 
 -- Allows us to show the full history of course X OR which version of the course was valid in date Y
-CREATE INDEX idx_course_layout_valid ON course_layout(course_code, valid_from, valid_to);
+CREATE INDEX IF NOT EXISTS idx_course_layout_valid ON course_layout(course_code, valid_from, valid_to);
 -- Example Query: SELECT * FROM course_layout WHERE course_code = 'MAT101' AND '2025-03-01' BETWEEN valid_from AND COALESCE(valid_to, '9999-12-31');
 
 -- =============================================================
 --   COURSE INSTANCE
 -- =============================================================
-CREATE TABLE course_instance (
+CREATE TABLE IF NOT EXISTS course_instance (
     course_instance_id   SERIAL PRIMARY KEY,
     num_students         INT,
     study_year           INT NOT NULL,
@@ -121,16 +139,16 @@ CREATE TABLE course_instance (
 -- =============================================================
 --   TEACHING ACTIVITY
 -- =============================================================
-CREATE TABLE teaching_activity (
+CREATE TABLE IF NOT EXISTS teaching_activity (
     activity_id     SERIAL PRIMARY KEY,
-    activity_name   CHAR(10) UNIQUE NOT NULL,
+    activity_name   VARCHAR(20) UNIQUE NOT NULL,
     factor          DECIMAL(10,2)
 );
 
 -- =============================================================
 --   PLANNED ACTIVITY
 -- =============================================================
-CREATE TABLE planned_activity (
+CREATE TABLE IF NOT EXISTS planned_activity (
     planned_activity_id  SERIAL PRIMARY KEY,
     planned_hours        INT,
     activity_id          INT NOT NULL,
@@ -143,7 +161,7 @@ CREATE TABLE planned_activity (
 -- =============================================================
 --   ALLOCATION
 -- =============================================================
-CREATE TABLE allocation (
+CREATE TABLE IF NOT EXISTS allocation (
     planned_activity_id  INT NOT NULL,
     employment_id        INT NOT NULL,
 
@@ -151,14 +169,6 @@ CREATE TABLE allocation (
 
     FOREIGN KEY (planned_activity_id) REFERENCES planned_activity(planned_activity_id),
     FOREIGN KEY (employment_id)       REFERENCES employee(employment_id)
-);
-
--- =============================================================
--- ALLOCATION LIMIT
--- =============================================================
-CREATE TABLE allocation_rule (
-    rule_name CHAR(20) PRIMARY KEY,
-    max_allocations INT NOT NULL CHECK (max_allocations > 0)
 );
 
 -- =============================================================
@@ -217,7 +227,7 @@ $$ LANGUAGE plpgsql;
 -- =============================================================
 --   TRIGGER ON ALLOCATION TABLE
 -- =============================================================
-CREATE TRIGGER trg_check_max_allocations
+CREATE OR REPLACE TRIGGER trg_check_max_allocations
 BEFORE INSERT OR UPDATE ON allocation
 FOR EACH ROW
 EXECUTE FUNCTION check_max_allocations();
@@ -226,7 +236,7 @@ EXECUTE FUNCTION check_max_allocations();
 -- ENFORCE: At most ONE manager per department
 -- (This completely replaces the need for another trigger)
 -- =============================================================
-CREATE UNIQUE INDEX idx_one_manager_per_department
+CREATE UNIQUE INDEX IF NOT EXISTS idx_one_manager_per_department
     ON employee (department_id)
     WHERE supervisor_manager = TRUE;
 
@@ -314,6 +324,3 @@ BEGIN
     );
 END;
 $$ LANGUAGE plpgsql;
-
-
-
