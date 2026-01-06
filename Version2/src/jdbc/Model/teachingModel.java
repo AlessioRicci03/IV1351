@@ -1,30 +1,41 @@
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Scanner;
+package jdbc.Model;
 
-public class teachingModel {
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import jdbc.DTO.TeacherDTO.AllocationResult;
+import jdbc.DTO.TeacherDTO.Case1Result;
+import jdbc.DTO.TeacherDTO.Case2Result;
+import jdbc.DTO.TeacherDTO.DeallocationResult;
+import jdbc.DTO.TeacherDTO.ExerciseResult;
+import jdbc.Integration.TeachingDAO;
+
+public class TeachingModel {
+
+    private final Connection conn;
+    private final TeachingDAO dao;
+
+    public TeachingModel(Connection conn) throws SQLException {
+        this.conn = conn;
+        this.dao = new TeachingDAO(conn);
+    }
 	
     // task 1: compute teaching cost
-    public Case1Result computeTeachingCost(String courseCode, int period) {
+    public Case1Result computeTeachingCost(String courseCode, int year, int period) {
         try {
-            conn.setAutoCommit(false);
 
-            double plannedHoursValue = dao.fetchPlannedHours(courseCode, period);
-            int students = dao.fetchNumStudents(courseCode, period);
+            double plannedHoursValue = dao.fetchPlannedHours(courseCode, year, period);
+            int students = dao.fetchNumStudents(courseCode, year, period);
             double studentOverhead = computeOverhead(students);
 
             final double AVERAGE_SALARY_KSEK_PER_MONTH = 45000.0;
             double plannedCost = plannedHoursValue * AVERAGE_SALARY_KSEK_PER_MONTH / 12.0 + studentOverhead;
 
-            double actualCost = dao.fetchActualHoursCost(courseCode, period) + studentOverhead;
-
-            conn.commit();
+            double actualCost = dao.fetchActualHoursCost(courseCode, year, period) + studentOverhead;
 
             return new Case1Result(plannedCost, actualCost);
 
         } catch (SQLException e) {
-            try { conn.rollback(); } catch (SQLException ignored) {}
             throw new RuntimeException("Error computing teaching cost", e);
         }
     }
@@ -36,12 +47,12 @@ public class teachingModel {
 
 
     //task 2: Add 100 students and show real cost impact (including student overhead)
-	public Case2Result modifyStudentsAndComputeCost(String courseCode, int period, int delta) throws SQLException {
+	public Case2Result modifyStudentsAndComputeCost(String courseCode, int year, int period, int delta) throws SQLException {
 
         conn.setAutoCommit(false);
 
-        int before = dao.fetchNumStudents(courseCode, period);
-        double costBefore = dao.fetchActualHoursCost(courseCode, period) + computeOverhead(before);
+        int before = dao.fetchNumStudents(courseCode, year, period);
+        double costBefore = dao.fetchActualHoursCost(courseCode, year, period) + computeOverhead(before);
 
         int after = before + delta;
 
@@ -50,9 +61,9 @@ public class teachingModel {
             after = max;
         }
 
-        dao.updateStudentCount(courseCode, period, after);
+        dao.updateStudentCount(courseCode, year, period, after);
 
-        double costAfter = dao.fetchActualHoursCost(courseCode, period) + computeOverhead(after);
+        double costAfter = dao.fetchActualHoursCost(courseCode, year, period) + computeOverhead(after);
 
         conn.commit();
 
@@ -60,7 +71,7 @@ public class teachingModel {
     }
 
     // Task 3: Allocate teacher (with 4-course limit check)
-    public Case3Result allocateTeacher(int activityId, int empId) {
+    public AllocationResult allocateTeacher(int year, int activityId, int empId) {
         try {
             conn.setAutoCommit(false);
 
@@ -70,7 +81,7 @@ public class teachingModel {
                 return new AllocationResult(false, "Invalid activity: not found");
             }
 
-            int currentLoad = dao.countTeacherCourses(empId, period);
+            int currentLoad = dao.countTeacherCourses(empId, year, period);
 
             if (currentLoad >= 4) {
                 conn.rollback();
@@ -98,7 +109,7 @@ public class teachingModel {
     }
 
     // Task 3: Deallocate teacher
-    public Case4Result deallocateTeacher(int activityId, int empId) {
+    public DeallocationResult deallocateTeacher(int activityId, int empId) {
         try {
             conn.setAutoCommit(false);
 
@@ -123,33 +134,39 @@ public class teachingModel {
     public ExerciseResult addExerciseActivity(
         String courseCode,
         int period,
+        int year,
+        String activityName,
         double plannedHours,
         int teacherId
     ) {
+        if (activityName == null || activityName.trim().isEmpty()){
+            return new ExerciseResult(false, "Activity name cannot be empty.");
+        }
+        activityName = activityName.trim();
+
         try {
             conn.setAutoCommit(false);
 
-            int exId = dao.insertExercise();
-            if (exId == -1)
-                exId = dao.getExerciseActivityId();
-
-            if (exId == -1) {
+            int exId;
+            try {
+                exId = dao.getOrCreateActivityId(activityName);
+            } catch (SQLException e){
                 conn.rollback();
-                return new ExerciseResult(false, "Could not create or retrieve Exercise activity ID.");
+                return new ExerciseResult(false, "Could not create or retrieve activity ID.");
             }
 
-            int instanceId = dao.findCourseInstanceId(courseCode, period);
+            int instanceId = dao.findCourseInstanceId(courseCode, year, period);
             if (instanceId == -1) {
                 conn.rollback();
                 return new ExerciseResult(false, "Course instance not found.");
             }
 
-            dao.insertPlannedExercise(instanceId, exId, plannedHours);
+            dao.insertPlannedActivity(instanceId, exId, plannedHours);
 
             int plannedId = dao.getPlannedExerciseActivityId(instanceId, exId);
             if (plannedId == -1) {
                 conn.rollback();
-                return new ExerciseResult(false, "Exercise planned activity could not be found.");
+                return new ExerciseResult(false, "Planned activity could not be found.");
             }
 
             int rows = dao.allocateTeacherToActivity(plannedId, teacherId);
@@ -160,7 +177,7 @@ public class teachingModel {
             }
 
             conn.commit();
-            return new ExerciseResult(true, "Exercise activity successfully added and teacher allocated.");
+            return new ExerciseResult(true, "Activity '"+ activityName +"' successfully added with "+ plannedHours +" hours and teacher allocated.");
 
         } catch (Exception e) {
             try { conn.rollback(); } catch (SQLException ignored) {}
